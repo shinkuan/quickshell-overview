@@ -121,7 +121,7 @@ Item {
                                 onClicked: {
                                     if (root.draggingTargetWorkspace === "") {
                                         GlobalStates.overviewOpen = false
-                                        Hyprland.dispatch(`exec hyprkool switch-to-workspace --name "${workspaceName}"`)
+                                        Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool switch-to-workspace --name "${workspaceName}"')`)
                                     }
                                 }
                             }
@@ -276,7 +276,7 @@ Item {
                             window.Drag.active = false
                             root.draggingFromWorkspace = ""
                             if (targetWorkspace !== "" && targetWorkspace !== windowData?.workspace.name) {
-                                Hyprland.dispatch(`movetoworkspacesilent name:${targetWorkspace}, address:${window.windowData?.address}`)
+                                Hyprland.dispatch(`hl.dsp.window.move({ workspace = "name:${targetWorkspace}", window = "address:${window.windowData?.address}", follow = false })`)
                                 updateWindowPosition.restart()
                             }
                             else {
@@ -289,10 +289,10 @@ Item {
 
                             if (event.button === Qt.LeftButton) {
                                 GlobalStates.overviewOpen = false
-                                Hyprland.dispatch(`exec hyprkool focus-window --address ${windowData.address}`)
+                                Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool focus-window --address ${windowData.address}')`)
                                 event.accepted = true
                             } else if (event.button === Qt.MiddleButton) {
-                                Hyprland.dispatch(`closewindow address:${windowData.address}`)
+                                Hyprland.dispatch(`hl.dsp.window.close("address:${windowData.address}")`)
                                 event.accepted = true
                             }
                         }

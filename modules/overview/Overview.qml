@@ -116,7 +116,7 @@ Scope {
                         
                         const newName = `${activity.name}:(${col} ${row})`;
                         
-                        Hyprland.dispatch(`exec hyprkool switch-to-workspace --name "${newName}"`);
+                        Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool switch-to-workspace --name "${newName}"')`);
                         event.accepted = true;
                     }
                 }
