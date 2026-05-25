@@ -121,7 +121,7 @@ Item {
                                 onClicked: {
                                     if (root.draggingTargetWorkspace === "") {
                                         GlobalStates.overviewOpen = false
-                                        Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool switch-to-workspace --name "${workspaceName}"')`)
+                                        Hyprland.dispatch(`(function() KGrid.switch_name("${workspaceName}") return hl.dsp.no_op() end)()`)
                                     }
                                 }
                             }
@@ -289,7 +289,7 @@ Item {
 
                             if (event.button === Qt.LeftButton) {
                                 GlobalStates.overviewOpen = false
-                                Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool focus-window --address ${windowData.address}')`)
+                                Hyprland.dispatch(`hl.dsp.focus({ window = "address:${windowData.address}" })`)
                                 event.accepted = true
                             } else if (event.button === Qt.MiddleButton) {
                                 Hyprland.dispatch(`hl.dsp.window.close("address:${windowData.address}")`)

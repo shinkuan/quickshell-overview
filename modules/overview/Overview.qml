@@ -115,8 +115,8 @@ Scope {
                         }
                         
                         const newName = `${activity.name}:(${col} ${row})`;
-                        
-                        Hyprland.dispatch(`hl.dsp.exec_cmd('hyprkool switch-to-workspace --name "${newName}"')`);
+
+                        Hyprland.dispatch(`(function() KGrid.switch_name("${newName}") return hl.dsp.no_op() end)()`);
                         event.accepted = true;
                     }
                 }
