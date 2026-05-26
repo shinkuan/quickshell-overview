@@ -276,7 +276,7 @@ Item {
                             window.Drag.active = false
                             root.draggingFromWorkspace = ""
                             if (targetWorkspace !== "" && targetWorkspace !== windowData?.workspace.name) {
-                                Hyprland.dispatch(`hl.dsp.window.move({ workspace = "name:${targetWorkspace}", window = "address:${window.windowData?.address}", follow = false })`)
+                                Hyprland.dispatch(`(function() KGrid.move_window_to_name("${targetWorkspace}", "${window.windowData?.address}") return hl.dsp.no_op() end)()`)
                                 updateWindowPosition.restart()
                             }
                             else {
