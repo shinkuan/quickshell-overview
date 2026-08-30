@@ -225,6 +225,15 @@ Item {
 
                     property bool atInitPosition: (initX == x && initY == y)
 
+                    // Dragging writes x/y imperatively, which breaks the
+                    // `x: initX` / `y: initY` bindings. Re-establish them so the
+                    // preview follows the window's real (monitor-relative)
+                    // position once HyprlandData refreshes.
+                    function restorePositionBinding() {
+                        window.x = Qt.binding(() => window.initX)
+                        window.y = Qt.binding(() => window.initY)
+                    }
+
                     property int workspaceColIndex: {
                         const name = windowData?.workspace?.name ?? "";
                         const match = name.match(/\((\d+) (\d+)\)/);
@@ -245,10 +254,7 @@ Item {
                         interval: Config.options.hacks.arbitraryRaceConditionDelay
                         repeat: false
                         running: false
-                        onTriggered: {
-                            window.x = Math.round(Math.max((windowData?.at?.[0] ?? 0) * root.scale, 0) + xOffset)
-                            window.y = Math.round(Math.max((windowData?.at?.[1] ?? 0) * root.scale, 0) + yOffset)
-                        }
+                        onTriggered: window.restorePositionBinding()
                     }
 
                     z: atInitPosition ? (root.windowZ + index) : root.windowDraggingZ
@@ -280,8 +286,7 @@ Item {
                                 updateWindowPosition.restart()
                             }
                             else {
-                                window.x = window.initX
-                                window.y = window.initY
+                                window.restorePositionBinding()
                             }
                         }
                         onClicked: (event) => {

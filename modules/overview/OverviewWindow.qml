@@ -16,42 +16,32 @@ Item { // Window
     property var availableWorkspaceWidth
     property var availableWorkspaceHeight
     property bool restrictToWorkspace: true
+    // Geometry of the monitor this window actually lives on (windowData.monitor
+    // comes from `hyprctl clients`, so it is correct even when the window sits on
+    // a different monitor than the overview widget).
     property var monitorGeometry: HyprlandData.monitorGeometries.find(m => m.id == (windowData?.monitor ?? -1))
     property real monitorX: monitorGeometry?.x ?? 0
     property real monitorY: monitorGeometry?.y ?? 0
-    property real monitorWidth: monitorGeometry?.width ?? 1920
-    property real monitorHeight: monitorGeometry?.height ?? 1080
-    property real monitorReservedTop: monitorGeometry?.reserved?.[1] ?? 0
-    property real monitorReservedLeft: monitorGeometry?.reserved?.[0] ?? 0
 
-    property real rawRelX: (windowData?.at?.[0] ?? 0) - monitorX - monitorReservedLeft
-    property real rawRelY: (windowData?.at?.[1] ?? 0) - monitorY - monitorReservedTop
+    // Window position relative to its own monitor's origin, in logical pixels.
+    // The workspace cell represents the whole monitor, so no reserved-area offset.
+    // Fullscreen windows sit exactly at the monitor origin (`at` == monitor pos),
+    // so this can be 0 or slightly negative — clamp, never wrap.
+    property real relX: (windowData?.at?.[0] ?? 0) - monitorX
+    property real relY: (windowData?.at?.[1] ?? 0) - monitorY
 
-    // Normalize coordinates to be within the monitor bounds (handling workspace offsets)
-    property real normalizedRelX: {
-        let w = monitorWidth;
-        if (w <= 0) return 0;
-        let val = rawRelX % w;
-        if (val < 0) val += w;
-        return val;
-    }
-    
-    property real normalizedRelY: {
-        let h = monitorHeight;
-        if (h <= 0) return 0;
-        let val = rawRelY % h;
-        if (val < 0) val += h;
-        return val;
-    }
-
-    property real initX: Math.max(normalizedRelX * root.scale, 0) + xOffset
-    property real initY: Math.max(normalizedRelY * root.scale, 0) + yOffset
     property real xOffset: 0
     property real yOffset: 0
     property int widgetMonitorId: 0
     
     property var targetWindowWidth: (windowData?.size?.[0] ?? 100) * scale
     property var targetWindowHeight: (windowData?.size?.[1] ?? 100) * scale
+    property real clampedWidth: Math.min(targetWindowWidth, availableWorkspaceWidth)
+    property real clampedHeight: Math.min(targetWindowHeight, availableWorkspaceHeight)
+
+    // Keep the preview inside its workspace cell.
+    property real initX: Math.max(Math.min(relX * root.scale, availableWorkspaceWidth - clampedWidth), 0) + xOffset
+    property real initY: Math.max(Math.min(relY * root.scale, availableWorkspaceHeight - clampedHeight), 0) + yOffset
     property bool hovered: false
     property bool pressed: false
 
@@ -66,8 +56,8 @@ Item { // Window
     
     x: initX
     y: initY
-    width: Math.min((windowData?.size?.[0] ?? 100) * root.scale, availableWorkspaceWidth)
-    height: Math.min((windowData?.size?.[1] ?? 100) * root.scale, availableWorkspaceHeight)
+    width: clampedWidth
+    height: clampedHeight
     opacity: 1
 
     Behavior on x {

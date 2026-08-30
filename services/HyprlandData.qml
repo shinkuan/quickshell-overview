@@ -129,6 +129,13 @@ Singleton {
                             activeWs = workspace;
                         }
                         workspace.windows.forEach(win => {
+                            // buildModel() replicates the full grid for every
+                            // monitor and the window objects are shared between
+                            // those copies, so each window shows up once per
+                            // monitor here. Only process it the first time —
+                            // otherwise later monitors overwrite its fields.
+                            if (winByAddr[win.address]) return;
+
                             // Merge with client data
                             var clientData = clientsMap[win.address];
                             if (clientData) {
@@ -137,11 +144,17 @@ Singleton {
                                 win.xwayland = clientData.xwayland;
                                 win.pinned = clientData.pinned;
                                 win.floating = clientData.floating;
-                                // win.monitor is set below from the structure
+                                win.fullscreen = clientData.fullscreen;
+                                // The monitor the window really lives on. A
+                                // workspace cell of the active activity may sit
+                                // on another monitor, and the grid "monitor"
+                                // we're iterating is NOT that.
+                                win.monitor = clientData.monitor;
+                            } else {
+                                win.monitor = -1;
                             }
 
                             win.workspace = workspace;
-                            win.monitor = monitor.id;
                             wins.push(win);
                             winByAddr[win.address] = win;
                             addrs.push(win.address);
